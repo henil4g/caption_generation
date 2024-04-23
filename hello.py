@@ -16,7 +16,7 @@ load_dotenv()
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client["filedata"]
 mycol = db["file_data"]
-
+now = datetime.now()
 # Define a directory to store uploaded files
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 DOWNLOAD_FOLDER = os.path.join(os.getcwd(), 'downloads')
@@ -205,7 +205,7 @@ def upload_file_vtv():
         file.save(filepath)
         output = os.path.join(app.config['OUTPUT_FOLDER'],file.filename)
         video_to_video(filepath,output)
-        now = datetime.now()
+        
         mydict = {"name":file.filename,"operation" : "add captions to video","time": now.strftime("%H:%M:%S") }
         x = mycol.insert_one(mydict) 
         # Check if the file was saved successfully
@@ -237,6 +237,9 @@ def upload_file_vta():
         file_name = file.filename.split(".")[0]
         output = os.path.join(app.config['OUTPUT_FOLDER'],file_name+".wav")
         clip.audio.write_audiofile(output)
+        mydict = {"name":file.filename,"operation" : "extract audio from video","time": now.strftime("%H:%M:%S") }
+        x = mycol.insert_one(mydict) 
+
         # Check if the file was saved successfully
         if os.path.exists(filepath):
             return render_template('upload_success_vta.html', filename=file.filename)
@@ -295,6 +298,8 @@ def upload_file_vts():
         file_name = file.filename.split(".")[0]
         output = os.path.join(app.config['OUTPUT_FOLDER'],file_name+".srt")
         video_to_srt(filepath,output)
+        mydict = {"name":file.filename,"operation" : "get srt from video","time": now.strftime("%H:%M:%S") }
+        x = mycol.insert_one(mydict) 
         # Check if the file was saved successfully
         if os.path.exists(filepath):
             return render_template('upload_success_vts.html', filename=file.filename)
@@ -383,6 +388,8 @@ def upload_file_ats():
         file_name = file.filename.split(".")[0]
         output = os.path.join(app.config['OUTPUT_FOLDER'],file_name+".srt")
         audio_to_srt(filepath,output)
+        mydict = {"name":file.filename,"operation" : "get srt from audio","time": now.strftime("%H:%M:%S") }
+        x = mycol.insert_one(mydict) 
         # Check if the file was saved successfully
         if os.path.exists(filepath):
             return render_template('upload_success_vts.html', filename=file.filename)
